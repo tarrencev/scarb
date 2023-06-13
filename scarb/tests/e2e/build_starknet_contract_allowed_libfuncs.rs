@@ -5,10 +5,13 @@ use crate::support::command::Scarb;
 use crate::support::project_builder::ProjectBuilder;
 
 const EXPERIMENTAL_LIBFUNC: &str = indoc! {r#"
-    #[contract]
+    #[starknet::contract]
     mod ExperimentalLibfunc {
-        #[external]
-        fn experiment() -> bool {
+        #[storage]
+        struct Storage {}
+
+        #[external(v0)]
+        fn experiment(ref self: ContractState) -> bool {
             let a = true;
             let b = false;
             a == b
@@ -38,10 +41,10 @@ fn default_behaviour() {
         [..] Compiling hello v0.1.0 ([..])
         warn: libfunc `bool_eq` is not allowed in the libfuncs list `Default libfunc list`
          --> contract: ExperimentalLibfunc
-        help: try compiling with the `experimental_v0.1.0` list
+        help: try compiling with the `experimental` list
          --> Scarb.toml
             [[target.starknet-contract]]
-            allowed-libfuncs-list.name = "experimental_v0.1.0"
+            allowed-libfuncs-list.name = "experimental"
 
         [..]  Finished release target(s) in [..]
         "#});
@@ -70,10 +73,10 @@ fn check_true() {
         [..] Compiling hello v0.1.0 ([..])
         warn: libfunc `bool_eq` is not allowed in the libfuncs list `Default libfunc list`
          --> contract: ExperimentalLibfunc
-        help: try compiling with the `experimental_v0.1.0` list
+        help: try compiling with the `experimental` list
          --> Scarb.toml
             [[target.starknet-contract]]
-            allowed-libfuncs-list.name = "experimental_v0.1.0"
+            allowed-libfuncs-list.name = "experimental"
 
         [..]  Finished release target(s) in [..]
         "#});
@@ -127,10 +130,10 @@ fn deny_true() {
         [..] Compiling hello v0.1.0 ([..])
         error: libfunc `bool_eq` is not allowed in the libfuncs list `Default libfunc list`
          --> contract: ExperimentalLibfunc
-        help: try compiling with the `experimental_v0.1.0` list
+        help: try compiling with the `experimental` list
          --> Scarb.toml
             [[target.starknet-contract]]
-            allowed-libfuncs-list.name = "experimental_v0.1.0"
+            allowed-libfuncs-list.name = "experimental"
 
         error: aborting compilation, because contracts use disallowed Sierra libfuncs
         error: could not compile `hello` due to previous error
@@ -145,7 +148,7 @@ fn pass_named_list() {
         .version("0.1.0")
         .manifest_extra(indoc! {r#"
             [[target.starknet-contract]]
-            allowed-libfuncs-list.name = "experimental_v0.1.0"
+            allowed-libfuncs-list.name = "experimental"
         "#})
         .dep_starknet()
         .lib_cairo(EXPERIMENTAL_LIBFUNC)
